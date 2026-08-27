@@ -90,6 +90,28 @@ export async function confirmItem(formData: FormData) {
     .eq("id", extractionId)
     .maybeSingle();
 
+  // A scan produces at most one item. Disabling the button stops the common
+  // double-tap, but not a retried request or a resubmitted back-button page,
+  // so re-confirming an extraction that already has an item is a no-op here
+  // rather than a second row.
+  //
+  // limit(1) because the pre-fix bug may already have left duplicate rows in
+  // an existing database; maybeSingle() alone would error on those instead of
+  // handling them.
+  if (extraction) {
+    const { data: already } = await supabase
+      .from("inventory_items")
+      .select("id")
+      .eq("extraction_id", extraction.id)
+      .limit(1)
+      .maybeSingle();
+
+    if (already) {
+      revalidatePath("/items");
+      redirect("/items");
+    }
+  }
+
   // was_corrected is the accuracy signal: it only means something when the
   // model actually predicted something, so leave it null on stubbed scans
   // rather than recording a "correction" of nothing.

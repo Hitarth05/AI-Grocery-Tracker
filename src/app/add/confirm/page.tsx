@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { confirmItem } from "@/app/add/actions";
+import { SubmitButton } from "@/components/SubmitButton";
 import { createClient } from "@/lib/supabase/server";
 import type { StorageLocation } from "@/types/database";
 
@@ -134,12 +135,12 @@ export default async function ConfirmPage({
           </Field>
         </div>
 
-        <button
-          type="submit"
+        <SubmitButton
+          pendingLabel="Saving…"
           className="mt-2 min-h-14 rounded-xl bg-emerald-600 font-medium text-white"
         >
           Track it
-        </button>
+        </SubmitButton>
 
         <Link
           href="/items"

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useFormStatus } from "react-dom";
 
 /**
  * capture="environment" hands straight to the rear camera on iOS and Android
@@ -9,12 +10,25 @@ import { useRef, useState } from "react";
  */
 export function CaptureButton({ formId }: { formId: string }) {
   const inputRef = useRef<HTMLInputElement>(null);
+  // Ref guards the handler (synchronous, survives no re-render); state drives
+  // the button label (a ref change alone would not repaint it).
+  const submitted = useRef(false);
+  const [submitting, setSubmitting] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const { pending } = useFormStatus();
 
   function onChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Picking a second photo while the first is still uploading would fire the
+    // action twice — two uploads and two extraction rows for one item. The ref
+    // rather than `pending` because pending only flips after the submit lands,
+    // which is a frame too late to catch a fast second pick.
+    if (submitted.current || pending) return;
+    submitted.current = true;
+    setSubmitting(true);
 
     setFileName(file.name);
     setPreview((old) => {
@@ -26,6 +40,8 @@ export function CaptureButton({ formId }: { formId: string }) {
     (document.getElementById(formId) as HTMLFormElement | null)?.requestSubmit();
   }
 
+  const busy = pending || submitting;
+
   return (
     <div className="flex flex-col items-center gap-4">
       <input
@@ -35,6 +51,7 @@ export function CaptureButton({ formId }: { formId: string }) {
         name="photo"
         accept="image/*"
         capture="environment"
+        disabled={busy}
         onChange={onChange}
         className="sr-only"
       />
@@ -54,10 +71,11 @@ export function CaptureButton({ formId }: { formId: string }) {
 
       <button
         type="button"
+        disabled={busy}
         onClick={() => inputRef.current?.click()}
-        className="min-h-14 w-full rounded-xl bg-emerald-600 font-medium text-white"
+        className="min-h-14 w-full rounded-xl bg-emerald-600 font-medium text-white disabled:opacity-60"
       >
-        {preview ? "Retake photo" : "Take a photo"}
+        {busy ? "Uploading…" : preview ? "Retake photo" : "Take a photo"}
       </button>
     </div>
   );
