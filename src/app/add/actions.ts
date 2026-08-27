@@ -154,7 +154,12 @@ export async function confirmItem(formData: FormData) {
     resolved_at: null,
   });
 
-  if (error) throw new Error(`Could not save item: ${error.message}`);
+  // 23505 = unique violation, i.e. this extraction already has an item and we
+  // lost the race the index exists to arbitrate. The user's item is saved —
+  // the other request saved it — so this is a success, not an error.
+  if (error && error.code !== "23505") {
+    throw new Error(`Could not save item: ${error.message}`);
+  }
 
   revalidatePath("/items");
   redirect("/items");
