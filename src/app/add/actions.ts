@@ -3,25 +3,35 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { extractFromPhoto, REVIEW_THRESHOLD } from "@/lib/extraction";
+import {
+  extractFromPhoto,
+  isSupportedMediaType,
+  REVIEW_THRESHOLD,
+} from "@/lib/extraction";
+import { PHOTO_BUCKET, photoFromUpload } from "@/lib/photos";
 import { getCurrentSpace } from "@/lib/spaces";
 import { createClient } from "@/lib/supabase/server";
 import type { ExpirySource, StorageLocation } from "@/types/database";
 
-const BUCKET = "item-photos";
-
 /**
- * Photo → Storage → extractions row → confirm screen.
+ * Photo → Storage → vision extraction → extractions row → confirm screen.
  *
- * The extraction row is written even when the model is not wired up yet, so
- * every scan is on the record from day one. That table is where extraction
- * accuracy comes from, and it can only measure scans it saw.
+ * An extraction row is written for every scan, including ones where the model
+ * failed or returned nothing. That table is where extraction accuracy comes
+ * from, and it can only measure the scans it saw.
  */
 export async function uploadAndExtract(formData: FormData) {
   const photo = formData.get("photo");
 
   if (!(photo instanceof File) || photo.size === 0) {
     redirect("/add?error=no_photo");
+  }
+
+  // Rejected before the upload, not after: the vision API cannot read HEIC, so
+  // storing it would leave a photo no model can extract from. Migration 0005
+  // enforces the same list at the bucket, this is the message the user sees.
+  if (!isSupportedMediaType(photo.type)) {
+    redirect("/add?error=unsupported_image");
   }
 
   const { userId, spaceId } = await getCurrentSpace();
@@ -33,14 +43,17 @@ export async function uploadAndExtract(formData: FormData) {
   const path = `${spaceId}/${crypto.randomUUID()}.${ext}`;
 
   const { error: uploadError } = await supabase.storage
-    .from(BUCKET)
+    .from(PHOTO_BUCKET)
     .upload(path, photo, { contentType: photo.type || "image/jpeg", upsert: false });
 
   if (uploadError) {
     redirect(`/add?error=${encodeURIComponent(uploadError.message)}`);
   }
 
-  const prediction = await extractFromPhoto(path);
+  // The bytes are already in memory from the upload — reading them back out of
+  // Storage just to hand them to the model would be a pointless round-trip on
+  // the one request the user is actively waiting on.
+  const prediction = await extractFromPhoto(await photoFromUpload(photo));
 
   const { data: extraction, error: extractionError } = await supabase
     .from("extractions")
@@ -86,7 +99,7 @@ export async function confirmItem(formData: FormData) {
 
   const { data: extraction } = await supabase
     .from("extractions")
-    .select("id, predicted_name, predicted_date, confidence")
+    .select("id, method, predicted_name, predicted_date, confidence")
     .eq("id", extractionId)
     .maybeSingle();
 
@@ -112,9 +125,10 @@ export async function confirmItem(formData: FormData) {
     }
   }
 
-  // was_corrected is the accuracy signal: it only means something when the
-  // model actually predicted something, so leave it null on stubbed scans
-  // rather than recording a "correction" of nothing.
+  // was_corrected is the accuracy signal, and it only means something when the
+  // model actually predicted something. Left null when it didn't (a failed call
+  // or a photo it couldn't read) so those rows don't count as corrections and
+  // drag the measured accuracy down for something that was never a prediction.
   const hadPrediction =
     Boolean(extraction?.predicted_name) || Boolean(extraction?.predicted_date);
   const wasCorrected = hadPrediction
@@ -135,9 +149,16 @@ export async function confirmItem(formData: FormData) {
       .eq("id", extraction.id);
   }
 
-  // Printed vs estimated vs manual — with the model stubbed, a date the user
-  // typed is 'manual'. The real pipeline sets 'printed' or 'estimated'.
-  const expirySource: ExpirySource = hadPrediction ? "printed" : "manual";
+  // How we actually got this date, which is what expiry_source records.
+  // 'printed' is claimable only when the model read a date off the packaging
+  // AND the user left it alone — a date the user typed or corrected is
+  // 'manual', however good the prediction around it was. The 'estimated' case
+  // (classify the item, apply a shelf life) arrives with the catalog_items
+  // seed; until then the no-printed-date path produces a manual date.
+  const keptPrediction =
+    expiryDate !== null && extraction?.predicted_date === expiryDate;
+  const expirySource: ExpirySource =
+    extraction?.method === "date_ocr" && keptPrediction ? "printed" : "manual";
 
   const { error } = await supabase.from("inventory_items").insert({
     space_id: spaceId,

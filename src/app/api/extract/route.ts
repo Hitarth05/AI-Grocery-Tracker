@@ -1,16 +1,16 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { extractFromPhoto, REVIEW_THRESHOLD } from "@/lib/extraction";
+import { loadPhotoFromStorage } from "@/lib/photos";
 import { createClient } from "@/lib/supabase/server";
 
 /**
  * Re-run extraction for a photo already in Storage.
  *
- * The add flow calls extractFromPhoto() inline, so this endpoint exists for
- * the cases that happen outside a form post: retrying a failed scan, and
- * back-filling predictions when the model or the threshold changes.
- *
- * The extraction itself is still the stub in @/lib/extraction.
+ * The add flow extracts inline from the bytes it just uploaded, so this
+ * endpoint covers the cases that happen afterwards: retrying a scan that failed
+ * or scored badly, and back-filling predictions when the model, the prompt, or
+ * the threshold changes and you want the existing corpus re-scored.
  */
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -45,7 +45,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "No such extraction" }, { status: 404 });
   }
 
-  const prediction = await extractFromPhoto(extraction.photo_path);
+  let prediction;
+  try {
+    const image = await loadPhotoFromStorage(supabase, extraction.photo_path);
+    prediction = await extractFromPhoto(image);
+  } catch (error) {
+    // extractFromPhoto never throws — this is the storage read failing.
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Could not read the photo" },
+      { status: 502 },
+    );
+  }
 
   const { error } = await supabase
     .from("extractions")

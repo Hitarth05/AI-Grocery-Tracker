@@ -24,7 +24,11 @@ export default async function AddPage({
             role="alert"
             className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-300"
           >
-            {error === "no_photo" ? "Pick a photo first." : error}
+            {error === "no_photo"
+              ? "Pick a photo first."
+              : error === "unsupported_image"
+                ? "That image format can't be read. Take the photo with the camera button, or use a JPEG or PNG."
+                : error}
           </p>
         )}
 

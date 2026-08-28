@@ -15,12 +15,15 @@ cp .env.local.example .env.local   # then fill in the two NEXT_PUBLIC_ values
 
 ### Database
 
-Two migrations live in `supabase/migrations/`, and both must be applied:
+Migrations live in `supabase/migrations/` and must all be applied, in order:
 
 | File | What it does |
 | --- | --- |
 | `0001_initial_schema.sql` | Tables, enums, indexes, first-pass RLS |
 | `0002_rls_bootstrap_storage.sql` | Finalized RLS, signup trigger, `item-photos` bucket |
+| `0003_lock_down_function_grants.sql` | Restricts SECURITY DEFINER functions to the right roles |
+| `0004_one_item_per_extraction.sql` | Unique index — one inventory item per scan |
+| `0005_restrict_photo_mime_types.sql` | Drops HEIC/HEIF, which no vision model reads |
 
 **0002 is not optional.** 0001's policies have no INSERT path for `spaces` or
 `space_members`, so without 0002 a new user authenticates and then sits in front
@@ -61,32 +64,52 @@ src/
     auth/callback/    exchanges the link's code for a session
     items/            home screen: what's expiring, one-tap used/tossed
     add/              camera capture → upload → confirm
-    api/extract/      re-run extraction for an existing photo (stub)
+    api/extract/      re-run extraction for an existing photo
   components/         ItemCard, CaptureButton, BottomNav
   lib/
     supabase/         browser / server / middleware clients
-    extraction.ts     THE VISION STUB — see below
+    extraction/       vision extraction — see below
+    photos.ts         load a stored photo as model-ready bytes
     expiry.ts         day math and urgency buckets
     spaces.ts         current user's space
   middleware.ts       refreshes the session, gates protected routes
 ```
 
-### The extraction stub
+### Extraction
 
-`src/lib/extraction.ts` returns confidence `0` and no prediction. Everything
-around it is wired: the photo uploads, an `extractions` row is written, and the
-scan lands on the confirm screen because zero is below `REVIEW_THRESHOLD`.
-Implementing the real vision call means changing that one function.
+`src/lib/extraction/` reads the photo with Claude Sonnet 5 and returns a name, an
+expiry date when one is printed, and a confidence score.
 
-`REVIEW_THRESHOLD` in the same file is the confidence dial — above it, a scan is
-accepted silently; below it, the user confirms. Start it conservative to gather
-labels, raise it as measured precision climbs.
+| File | Role |
+| --- | --- |
+| `index.ts` | The only thing callers import. Validation, sanity checks, failure handling. |
+| `prompt.ts` | System prompt and the Zod output schema. Provider-neutral. |
+| `anthropic.ts` | The one file that imports the SDK. |
+
+Two paths, one call: read a printed USE BY / BEST BEFORE date, or — for loose
+produce, bakery, and deli — classify the item and return a null date. The
+classification path stays date-less until `catalog_items` is seeded with shelf
+lives; the classification is recorded either way, so it becomes useful the moment
+that data lands.
+
+`REVIEW_THRESHOLD` in `index.ts` is the confidence dial: above it a scan is
+accepted silently, below it the user confirms. Start conservative to gather
+labels, and raise it as measured precision climbs — but note that a model's
+self-reported confidence is **not** a calibrated probability, so check accuracy
+against the score on real reviewed scans before trusting a higher threshold.
+
+**Extraction never throws.** An API error, a refusal, a missing key, or an
+unreadable response all return confidence `0`, which routes the scan to the
+confirm screen with the reason recorded in `raw_model_output`. A model outage
+degrades the app to manual entry; it does not fail an upload at the fridge.
 
 ### Security notes
 
 - Photos live in a **private** bucket, keyed `{space_id}/{uuid}.ext`, and are
   shown through short-lived signed URLs. The first path segment is what the RLS
   policy checks, so it must be the space id.
+- `ANTHROPIC_API_KEY` is server-side only. Never give it a `NEXT_PUBLIC_` prefix —
+  that inlines the value into the browser bundle.
 - Spaces are created through the `create_space()` function, not a direct insert.
   A raw insert would leave the space ownerless for a moment, and an ownerless
   space is claimable by anyone.
@@ -96,8 +119,8 @@ labels, raise it as measured precision climbs.
 
 ## Not built yet
 
-- The vision call (see above)
-- USDA FoodKeeper seed data for `catalog_items`
+- USDA FoodKeeper seed data for `catalog_items` — until it lands, the
+  no-printed-date path classifies the item but can't estimate a shelf life
 - Reminders: a Vercel cron calling `mark_expired_items()` and writing
   `notifications`
 - Multi-user invites (the schema and policies support it; there's no UI)
