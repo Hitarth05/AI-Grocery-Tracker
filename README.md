@@ -10,7 +10,7 @@ Next.js (App Router) · Supabase (Postgres + Auth + Storage) · Tailwind.
 
 ```bash
 pnpm install
-cp .env.local.example .env.local   # then fill in the two NEXT_PUBLIC_ values
+cp .env.local.example .env.local   # then fill in the values
 ```
 
 ### Database
@@ -23,17 +23,23 @@ Migrations live in `supabase/migrations/` and must all be applied, in order:
 | `0002_rls_bootstrap_storage.sql` | Finalized RLS, signup trigger, `item-photos` bucket |
 | `0003_lock_down_function_grants.sql` | Restricts SECURITY DEFINER functions to the right roles |
 | `0004_one_item_per_extraction.sql` | Unique index — one inventory item per scan |
-| `0005_restrict_photo_mime_types.sql` | Drops HEIC/HEIF, which no vision model reads |
+| `0005_restrict_photo_mime_types.sql` | Limits photos to JPEG/PNG/WebP — see below |
 
 **0002 is not optional.** 0001's policies have no INSERT path for `spaces` or
 `space_members`, so without 0002 a new user authenticates and then sits in front
 of an empty list they can never add to.
 
+**On 0005:** the allowed list is the *intersection* of what the extraction
+providers read, not what any one of them supports. Gemini reads HEIC and HEIF;
+Claude doesn't. Allowing HEIC would mean photos that store fine and then become
+unreadable the moment `ACTIVE_PROVIDER` switches to Anthropic, so the narrower
+list is what keeps that switch free.
+
 **Local** (needs Docker running):
 
 ```bash
 pnpm exec supabase start
-pnpm exec supabase db reset    # applies both migrations in order
+pnpm exec supabase db reset    # applies every migration in order
 ```
 
 **Hosted:**
@@ -44,7 +50,7 @@ pnpm exec supabase link --project-ref <your-project-ref>
 pnpm exec supabase db push
 ```
 
-Or paste both files, in order, into the dashboard's SQL Editor.
+Or paste each file, in order, into the dashboard's SQL Editor.
 
 ### Run
 
@@ -68,7 +74,7 @@ src/
   components/         ItemCard, CaptureButton, BottomNav
   lib/
     supabase/         browser / server / middleware clients
-    extraction/       vision extraction — see below
+    extraction/       vision extraction (Gemini active, Anthropic standby)
     photos.ts         load a stored photo as model-ready bytes
     expiry.ts         day math and urgency buckets
     spaces.ts         current user's space
@@ -77,14 +83,24 @@ src/
 
 ### Extraction
 
-`src/lib/extraction/` reads the photo with Claude Sonnet 5 and returns a name, an
-expiry date when one is printed, and a confidence score.
+`src/lib/extraction/` reads the photo and returns a name, an expiry date when one
+is printed, and a confidence score. v1 runs on **Gemini Flash's free tier**
+(`gemini-3.7-flash`) so the accuracy baseline costs nothing to gather.
 
 | File | Role |
 | --- | --- |
-| `index.ts` | The only thing callers import. Validation, sanity checks, failure handling. |
+| `index.ts` | The only thing callers import. Provider selection, validation, sanity checks, failure handling. |
 | `prompt.ts` | System prompt and the Zod output schema. Provider-neutral. |
-| `anthropic.ts` | The one file that imports the SDK. |
+| `gemini.ts` | Google provider — **active**. |
+| `anthropic.ts` | Claude Sonnet 5 provider — the upgrade path if measured accuracy falls short. |
+
+**Switching providers is one constant:** `ACTIVE_PROVIDER` in `index.ts`. Both
+providers stay imported so both are typechecked on every build — an unreferenced
+one rots into something that no longer compiles by the time you need it.
+
+**Note on the free tier:** Google uses free-tier data to improve their products,
+so item photos are training data there. The paid tier isn't. Fine for a personal
+fridge; think again before pointing this at premises you don't own.
 
 Two paths, one call: read a printed USE BY / BEST BEFORE date, or — for loose
 produce, bakery, and deli — classify the item and return a null date. The
@@ -108,8 +124,9 @@ degrades the app to manual entry; it does not fail an upload at the fridge.
 - Photos live in a **private** bucket, keyed `{space_id}/{uuid}.ext`, and are
   shown through short-lived signed URLs. The first path segment is what the RLS
   policy checks, so it must be the space id.
-- `ANTHROPIC_API_KEY` is server-side only. Never give it a `NEXT_PUBLIC_` prefix —
-  that inlines the value into the browser bundle.
+- `GEMINI_API_KEY` (and `ANTHROPIC_API_KEY`, if you switch back) are server-side
+  only. Never give either a `NEXT_PUBLIC_` prefix — that inlines the value into
+  the browser bundle.
 - Spaces are created through the `create_space()` function, not a direct insert.
   A raw insert would leave the space ownerless for a moment, and an ownerless
   space is claimable by anyone.

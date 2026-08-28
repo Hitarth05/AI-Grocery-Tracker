@@ -1,11 +1,34 @@
 import type { ExtractionMethod, Json, PrintedDateType } from "@/types/database";
 
-import { ExtractionUnavailableError, runAnthropicExtraction } from "./anthropic";
+import { runAnthropicExtraction } from "./anthropic";
+import { runGeminiExtraction } from "./gemini";
 import type { RawPrediction } from "./prompt";
-import type { ImageSource } from "./types";
+import { ExtractionUnavailableError, type ExtractionProvider, type ImageSource } from "./types";
 
 export type { ImageSource } from "./types";
-export { isSupportedMediaType } from "./anthropic";
+export { isSupportedMediaType } from "./types";
+
+/**
+ * The providers this app can extract with, and which one is live.
+ *
+ * v1 runs on Gemini's free tier: the accuracy baseline costs nothing to gather,
+ * and there's no case for paying per scan before knowing whether the numbers
+ * justify it. Claude Sonnet 5 is the documented upgrade path if they don't.
+ *
+ * Switching is editing ACTIVE_PROVIDER. Both stay imported deliberately — an
+ * unreferenced provider stops being typechecked and quietly rots into something
+ * that no longer compiles by the time you need it, which would make the swap
+ * expensive exactly when you want it cheap.
+ *
+ * Not an env var: the provider serving production should be visible in the
+ * code, and there's no reason to flip it without a deploy.
+ */
+const PROVIDERS = {
+  gemini: runGeminiExtraction,
+  anthropic: runAnthropicExtraction,
+} satisfies Record<string, ExtractionProvider>;
+
+const ACTIVE_PROVIDER: keyof typeof PROVIDERS = "gemini";
 
 /**
  * Confidence threshold below which we ask the user to confirm.
@@ -50,7 +73,7 @@ export async function extractFromPhoto(image: ImageSource): Promise<Prediction> 
   let raw: RawPrediction;
 
   try {
-    raw = await runAnthropicExtraction(image);
+    raw = await PROVIDERS[ACTIVE_PROVIDER](image);
   } catch (error) {
     return unavailable(error);
   }
@@ -108,7 +131,9 @@ function sanityCheck(raw: RawPrediction): Prediction {
     category: raw.category?.trim() || null,
     confidence,
     raw: {
-      provider: "anthropic",
+      // Recorded per-row so a corpus scanned across a provider switch can still
+      // be split by provider when comparing measured accuracy.
+      provider: ACTIVE_PROVIDER,
       model_output: raw as unknown as Json,
       ...(notes.length > 0 ? { validation_notes: notes } : {}),
     },
@@ -127,7 +152,7 @@ function unavailable(error: unknown): Prediction {
     error instanceof ExtractionUnavailableError ? error.cause_ : "api_error";
   const message = error instanceof Error ? error.message : String(error);
 
-  console.error(`[extraction] ${reason}: ${message}`);
+  console.error(`[extraction:${ACTIVE_PROVIDER}] ${reason}: ${message}`);
 
   return {
     method: "classification",
@@ -136,7 +161,7 @@ function unavailable(error: unknown): Prediction {
     dateType: "unknown",
     category: null,
     confidence: 0,
-    raw: { provider: "anthropic", error: reason, message },
+    raw: { provider: ACTIVE_PROVIDER, error: reason, message },
   };
 }
 

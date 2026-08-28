@@ -4,12 +4,20 @@ import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 
 import { predictionSchema, SYSTEM_PROMPT, type RawPrediction } from "./prompt";
-import type { ImageSource } from "./types";
+import {
+  ExtractionUnavailableError,
+  isSupportedMediaType,
+  type ImageSource,
+} from "./types";
 
 /**
  * Vision-capable Sonnet tier. Sonnet 5 is the first Sonnet with high-resolution
  * vision (2576px on the long edge), which is what makes small printed date
  * stamps legible — the whole task hinges on reading fine print.
+ *
+ * Not the active provider: v1 runs on Gemini's free tier while accuracy is
+ * unvalidated. This stays compiled and typechecked so switching back is one
+ * constant in ./index — see ACTIVE_PROVIDER there.
  */
 const MODEL = "claude-sonnet-5";
 
@@ -19,31 +27,6 @@ const MODEL = "claude-sonnet-5";
  * at the fridge waiting for. Sweep this against real scans before changing it.
  */
 const EFFORT = "medium" as const;
-
-/** Media types the vision API accepts. HEIC is not among them. */
-const SUPPORTED_MEDIA_TYPES = [
-  "image/jpeg",
-  "image/png",
-  "image/gif",
-  "image/webp",
-] as const;
-
-type SupportedMediaType = (typeof SUPPORTED_MEDIA_TYPES)[number];
-
-export function isSupportedMediaType(t: string): t is SupportedMediaType {
-  return (SUPPORTED_MEDIA_TYPES as readonly string[]).includes(t);
-}
-
-/** Thrown for conditions the caller should surface, not retry blindly. */
-export class ExtractionUnavailableError extends Error {
-  constructor(
-    message: string,
-    readonly cause_: string,
-  ) {
-    super(message);
-    this.name = "ExtractionUnavailableError";
-  }
-}
 
 let client: Anthropic | null = null;
 
