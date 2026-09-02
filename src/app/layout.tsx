@@ -14,9 +14,15 @@ const display = Bricolage_Grotesque({
 const body = Figtree({ variable: "--font-body", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Fridge",
+  title: "Grocery Tracker",
   description: "Track what's in your fridge and use it before it expires.",
-  appleWebApp: { capable: true, statusBarStyle: "default", title: "Fridge" },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    // Shown under the icon when added to the home screen, where space is
+    // tight — the short form reads better there than the full name.
+    title: "Groceries",
+  },
 };
 
 export const viewport: Viewport = {

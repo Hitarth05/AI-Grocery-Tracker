@@ -79,7 +79,11 @@ export function LoginForm({ initialError }: { initialError?: string }) {
   return (
     <main className="flex min-h-dvh flex-col px-6 pb-[env(safe-area-inset-bottom)]">
       <div className="flex flex-1 flex-col justify-center">
-        <h1 className="type-display text-[34px] font-bold">Fridge</h1>
+        {/* text-balance because the name is long enough to wrap on a narrow
+            phone, and an even two-line break reads better than an orphan. */}
+        <h1 className="type-display text-balance text-[32px] font-bold leading-[1.15]">
+          Grocery Tracker
+        </h1>
         <p className="mt-2 text-[17px] leading-relaxed text-[var(--ink-soft)]">
           Snap a photo, we&apos;ll remind you before it goes bad.
         </p>

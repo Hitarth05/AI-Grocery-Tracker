@@ -1,4 +1,4 @@
-# Fridge — grocery expiry tracker
+# Grocery Tracker
 
 Photograph a grocery item, get reminded before it expires, tap "used it" or
 "tossed it". See [CLAUDE.md](./CLAUDE.md) for the product thinking; this file is
