@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Figtree } from "next/font/google";
 
+import { PAGE_BACKGROUND } from "@/lib/theme";
+
 import "./globals.css";
 
 // Two roles. Bricolage carries headings and eyebrows via .type-display;
@@ -24,7 +26,8 @@ export const viewport: Viewport = {
   // padding in the layout below keeps content out from under them.
   viewportFit: "cover",
   // Matches the page ground so the browser chrome blends into the app.
-  themeColor: "#f5e9dc",
+  // Kept in sync with --background by pnpm run check:tokens.
+  themeColor: PAGE_BACKGROUND,
 };
 
 export default function RootLayout({

@@ -121,125 +121,138 @@ textarea {
   --u-wash: #fdfaf7;
 }
 
-/* ---- type ---- */
+/* ============================================================
+   Components.
 
-.type-display {
-  font-family: var(--font-display), var(--font-body), system-ui, sans-serif;
-  letter-spacing: -0.02em;
-}
+   Explicitly in @layer components rather than unlayered. Unlayered CSS
+   beats every layer, which meant these silently outranked Tailwind
+   utilities — a `text-sm` on a call site would look applied and do
+   nothing. In this layer the order is the one people expect: preflight
+   (base) loses to these, and a utility at a call site can still override
+   them when a one-off genuinely needs it.
+   ============================================================ */
 
-/* An eyebrow: small, spaced, quiet. Labels a group without competing. */
-.type-eyebrow {
-  font-family: var(--font-display), var(--font-body), system-ui, sans-serif;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-}
+@layer components {
+  /* ---- type ---- */
 
-/* ---- surfaces ---- */
+  .type-display {
+    font-family: var(--font-display), var(--font-body), system-ui, sans-serif;
+    letter-spacing: -0.02em;
+  }
 
-/* A card whose background carries its urgency. */
-.u-card {
-  background: var(--u-wash);
-  box-shadow: var(--shadow-card);
-  border-radius: var(--radius-card);
-}
+  /* An eyebrow: small, spaced, quiet. Labels a group without competing. */
+  .type-eyebrow {
+    font-family: var(--font-display), var(--font-body), system-ui, sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
 
-/* A card with nothing to signal: plain paper. */
-.panel {
-  background: var(--surface);
-  box-shadow: var(--shadow-card);
-  border-radius: var(--radius-card);
-}
+  /* ---- surfaces ---- */
 
-.u-pill {
-  background: var(--u-tint);
-  color: var(--u-ink);
-  /* Tabular figures so day counts don't jitter between stacked cards. */
-  font-variant-numeric: tabular-nums;
-}
+  /* A card whose background carries its urgency. */
+  .u-card {
+    background: var(--u-wash);
+    box-shadow: var(--shadow-card);
+    border-radius: var(--radius-card);
+  }
 
-/* ---- controls ---- */
+  /* A card with nothing to signal: plain paper. */
+  .panel {
+    background: var(--surface);
+    box-shadow: var(--shadow-card);
+    border-radius: var(--radius-card);
+  }
 
-.btn-primary,
-.btn-secondary {
-  border-radius: var(--radius-control);
-  border: 1px solid transparent;
-  /* Type lives here, not at the call sites. A larger button in the same
-     green reads as a brighter, flatter slab — more area of a colour looks
-     more saturated — so letting each screen pick its own size was enough
-     to make identical greens look like different ones. */
-  font-size: 15px;
-  font-weight: 600;
-  line-height: 1.2;
-  transition: background-color 120ms ease;
-}
+  .u-pill {
+    background: var(--u-tint);
+    color: var(--u-ink);
+    /* Tabular figures so day counts don't jitter between stacked cards. */
+    font-variant-numeric: tabular-nums;
+  }
 
-/* Solid dark sage, white label: 7.5:1, past AAA for normal text, and 7:1 or
-   better against every card wash so it asserts itself on a red-tinted
-   expired card as clearly as on a green-tinted fresh one. */
-.btn-primary {
-  background: var(--primary);
-  color: var(--primary-ink);
-}
-.btn-primary:active:not(:disabled) {
-  background: var(--primary-hover);
-}
+  /* ---- controls ---- */
 
-/* Quieter by fill weight rather than by size — same tap target, visibly
-   recessive. The outline keeps its edge on any background. */
-.btn-secondary {
-  background: var(--secondary-bg);
-  color: var(--secondary-ink);
-  border-color: var(--secondary-border);
-}
-.btn-secondary:active:not(:disabled) {
-  background: #f7f0e9;
-}
+  .btn-primary,
+  .btn-secondary {
+    border-radius: var(--radius-control);
+    border: 1px solid transparent;
+    /* Type lives here, not at the call sites. A larger button in the same
+       green reads as a brighter, flatter slab — more area of a colour looks
+       more saturated — so letting each screen pick its own size was enough
+       to make identical greens look like different ones. */
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.2;
+    transition: background-color 120ms ease;
+  }
 
-.btn-secondary.is-danger {
-  color: var(--danger-ink);
-}
+  /* Solid dark sage, white label: 7.5:1, past AAA for normal text, and 7:1 or
+     better against every card wash so it asserts itself on a red-tinted
+     expired card as clearly as on a green-tinted fresh one. */
+  .btn-primary {
+    background: var(--primary);
+    color: var(--primary-ink);
+  }
+  .btn-primary:active:not(:disabled) {
+    background: var(--primary-hover);
+  }
 
-.input {
-  background: var(--surface);
-  border: 1px solid var(--secondary-border);
-  border-radius: var(--radius-control);
-  color: var(--foreground);
-  outline: none;
-}
-.input::placeholder {
-  color: var(--ink-soft);
-  opacity: 0.7;
-}
+  /* Quieter by fill weight rather than by size — same tap target, visibly
+     recessive. The outline keeps its edge on any background. */
+  .btn-secondary {
+    background: var(--secondary-bg);
+    color: var(--secondary-ink);
+    border-color: var(--secondary-border);
+  }
+  .btn-secondary:active:not(:disabled) {
+    background: #f7f0e9;
+  }
 
-/* A one-tap choice among a few. Selected takes the solid treatment so the
-   answer is legible at a glance, not just to whoever is looking for it. */
-.chip {
-  background: var(--surface);
-  border: 1px solid var(--secondary-border);
-  border-radius: var(--radius-control);
-  color: var(--secondary-ink);
-  transition: background-color 120ms ease;
-}
-.chip:has(:checked) {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: var(--primary-ink);
-}
+  .btn-secondary.is-danger {
+    color: var(--danger-ink);
+  }
 
-/* Errors borrow the expired ink: one red in the system, one meaning. */
-.alert {
-  background: var(--u-tint, #fbe0dc);
-  color: var(--u-ink, #8f2a22);
-  border-radius: var(--radius-control);
-}
+  .input {
+    background: var(--surface);
+    border: 1px solid var(--secondary-border);
+    border-radius: var(--radius-control);
+    color: var(--foreground);
+    outline: none;
+  }
+  .input::placeholder {
+    color: var(--ink-soft);
+    opacity: 0.7;
+  }
 
-/* Visible keyboard focus on everything, not just inputs. */
-:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-  border-radius: 12px;
+  /* A one-tap choice among a few. Selected takes the solid treatment so the
+     answer is legible at a glance, not just to whoever is looking for it. */
+  .chip {
+    background: var(--surface);
+    border: 1px solid var(--secondary-border);
+    border-radius: var(--radius-control);
+    color: var(--secondary-ink);
+    transition: background-color 120ms ease;
+  }
+  .chip:has(:checked) {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--primary-ink);
+  }
+
+  /* Errors borrow the expired ink: one red in the system, one meaning. */
+  .alert {
+    background: var(--u-tint, #fbe0dc);
+    color: var(--u-ink, #8f2a22);
+    border-radius: var(--radius-control);
+  }
+
+  /* Visible keyboard focus on everything, not just inputs. */
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+    border-radius: 12px;
+  }
 }
