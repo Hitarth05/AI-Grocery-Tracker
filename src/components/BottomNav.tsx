@@ -27,10 +27,10 @@ export function BottomNav() {
               key={href}
               href={href}
               aria-current={active ? "page" : undefined}
+              // Colours come from tokens so the nav follows whatever theme it
+              // is rendered inside; :root keeps today's emerald.
               className={`flex min-h-16 flex-1 flex-col items-center justify-center gap-1 text-xs ${
-                active
-                  ? "text-emerald-700 dark:text-emerald-400"
-                  : "text-neutral-500 dark:text-neutral-400"
+                active ? "text-[var(--accent)]" : "text-[var(--ink-soft)]"
               }`}
             >
               <Icon />

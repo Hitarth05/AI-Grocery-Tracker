@@ -40,6 +40,28 @@ export function expiryLabel(date: string | null, now: Date = new Date()): string
   return `${days} days`;
 }
 
+/**
+ * The days-left label split so the number can be set large and the unit small.
+ *
+ * `trail` is absent for the cases where a bare word says it better than a
+ * digit would — "Today" reads faster than "0 days", and at the fridge that
+ * difference is the whole point of the pill.
+ */
+export function expiryParts(
+  date: string | null,
+  now: Date = new Date(),
+): { lead: string; trail?: string } {
+  const days = daysUntil(date, now);
+
+  if (days === null) return { lead: "No date" };
+  if (days === 0) return { lead: "Today" };
+  if (days === 1) return { lead: "Tomorrow" };
+  if (days === -1) return { lead: "Yesterday" };
+  if (days < -1) return { lead: String(Math.abs(days)), trail: "days ago" };
+
+  return { lead: String(days), trail: "days" };
+}
+
 export const URGENCY_ORDER: Urgency[] = [
   "expired",
   "today",

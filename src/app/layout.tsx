@@ -1,9 +1,18 @@
 import type { Metadata, Viewport } from "next";
-import { Geist } from "next/font/google";
+import { Bricolage_Grotesque, Figtree, Geist } from "next/font/google";
 
 import "./globals.css";
 
 const geist = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
+
+// Loaded as CSS variables only — the global font-family is untouched, so
+// these apply exactly where .theme-warm switches to them (the items screen
+// during the preview) and nowhere else.
+const display = Bricolage_Grotesque({
+  variable: "--font-display",
+  subsets: ["latin"],
+});
+const body = Figtree({ variable: "--font-body", subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Fridge",
@@ -28,7 +37,9 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className={`${geist.variable} antialiased`}>
+      <body
+        className={`${geist.variable} ${display.variable} ${body.variable} antialiased`}
+      >
         {/* Single column, phone width. Desktop gets the same column centered
             rather than a different layout — one thing to maintain. */}
         <div className="mx-auto min-h-dvh w-full max-w-md">{children}</div>

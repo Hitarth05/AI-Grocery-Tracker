@@ -5,6 +5,10 @@
   --foreground: #171717;
   --surface: #f5f5f4;
   --border: #e7e5e4;
+  --ink-soft: #737373;
+  /* emerald-700 — the current accent, tokenized so themed subtrees can
+     override it without components hardcoding a colour. */
+  --accent: #047857;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -13,6 +17,8 @@
     --foreground: #ededed;
     --surface: #1c1917;
     --border: #292524;
+    --ink-soft: #a3a3a3;
+    --accent: #34d399; /* emerald-400 */
   }
 }
 
@@ -53,4 +59,153 @@ textarea {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ============================================================
+   Warm theme — preview, currently scoped to the items screen.
+   
+   Redefines the same four variables :root sets, so every component
+   inside .theme-warm restyles without touching its colour classes.
+   To promote it everywhere, move the class onto <body> and delete
+   the :root block above. To back it out, delete this block.
+   ============================================================ */
+
+.theme-warm {
+  /* Blush rather than cream: a warm white with a pink cast, which stays
+     warm without pushing white cards towards muddy. */
+  --background: #fdf6f1;
+  --surface: #ffffff;
+  --foreground: #2b1d17;
+  --border: #f0e2d8;
+
+  --ink-soft: #7c6960;
+
+  /* Chestnut. Deliberately not terracotta: the urgency ramp owns amber
+     and red, and a brand colour sitting between them would read as a
+     deadline. This one cannot be mistaken for one. */
+  --accent: #6f4436;
+  --accent-ink: #ffffff;
+  --accent-hover: #5b3729;
+
+  /* Warm-tinted rather than black: black shadows over a blush ground
+     go grey and dead. */
+  --shadow-card: 0 1px 2px rgba(43, 29, 23, 0.05),
+    0 10px 28px -14px rgba(43, 29, 23, 0.18);
+
+  font-family: var(--font-body), system-ui, -apple-system, sans-serif;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* The urgency ramp, food-derived rather than traffic lights. Each level
+   sets three variables that any descendant can consume:
+     --u-ink   saturated, for the pill's text
+     --u-tint  the pill's fill
+     --u-wash  the card's own background — much fainter, so a fridge full
+               of fresh food reads calm rather than decorated */
+.theme-warm [data-urgency="ok"] {
+  --u-ink: #2f6b41;
+  --u-tint: #eaf2e7;
+  --u-wash: #f8fbf7;
+}
+.theme-warm [data-urgency="soon"] {
+  --u-ink: #8a5a12;
+  --u-tint: #fbeedc;
+  --u-wash: #fefaf3;
+}
+.theme-warm [data-urgency="today"] {
+  --u-ink: #b04a1c;
+  --u-tint: #fce6d9;
+  --u-wash: #fef6f1;
+}
+.theme-warm [data-urgency="expired"] {
+  --u-ink: #9c2f26;
+  --u-tint: #fadfdb;
+  --u-wash: #fdf2f0;
+}
+.theme-warm [data-urgency="unknown"] {
+  --u-ink: #7c6960;
+  --u-tint: #f2e9e3;
+  --u-wash: #fbf8f5;
+}
+
+@media (prefers-color-scheme: dark) {
+  .theme-warm {
+    --background: #1a120e;
+    --surface: #241913;
+    --foreground: #f4e9e1;
+    --border: #392a22;
+    --ink-soft: #b39c90;
+    --accent: #c08063;
+    --accent-ink: #241913;
+    --accent-hover: #cf9276;
+    --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4),
+      0 10px 28px -14px rgba(0, 0, 0, 0.6);
+  }
+
+  .theme-warm [data-urgency="ok"] {
+    --u-ink: #9ed8ae;
+    --u-tint: #1e2e22;
+    --u-wash: #1e1610;
+  }
+  .theme-warm [data-urgency="soon"] {
+    --u-ink: #e8b764;
+    --u-tint: #33240f;
+    --u-wash: #221812;
+  }
+  .theme-warm [data-urgency="today"] {
+    --u-ink: #f0a277;
+    --u-tint: #3a2114;
+    --u-wash: #241813;
+  }
+  .theme-warm [data-urgency="expired"] {
+    --u-ink: #f09184;
+    --u-tint: #3d1d19;
+    --u-wash: #261613;
+  }
+  .theme-warm [data-urgency="unknown"] {
+    --u-ink: #b39c90;
+    --u-tint: #2a201a;
+    --u-wash: #1f1713;
+  }
+}
+
+/* ---- components ---- */
+
+.theme-warm .type-display {
+  font-family: var(--font-display), var(--font-body), system-ui, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.theme-warm .u-card {
+  background: var(--u-wash);
+  box-shadow: var(--shadow-card);
+}
+
+.theme-warm .u-pill {
+  background: var(--u-tint);
+  color: var(--u-ink);
+  /* Tabular figures so day counts don't jitter between stacked cards. */
+  font-variant-numeric: tabular-nums;
+}
+
+.theme-warm .btn-primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.theme-warm .btn-primary:active:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.theme-warm .btn-quiet {
+  background: var(--surface);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+}
+
+/* Visible keyboard focus everywhere in the theme, not just on inputs. */
+.theme-warm :focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 12px;
 }

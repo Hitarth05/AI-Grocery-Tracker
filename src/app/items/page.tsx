@@ -45,15 +45,18 @@ export default async function ItemsPage() {
   }
 
   return (
-    <>
-      {/* pb-24 clears the fixed bottom nav. */}
-      <main className="px-4 pb-24 pt-[max(1rem,env(safe-area-inset-top))]">
-        <header className="mb-5 flex items-baseline justify-between gap-3">
+    // theme-warm is the whole preview: it redefines the same variables :root
+    // sets, so everything inside — including BottomNav — picks up the warm
+    // palette, and every other screen is untouched.
+    <div className="theme-warm min-h-dvh">
+      {/* pb-28 clears the fixed bottom nav. */}
+      <main className="px-4 pb-28 pt-[max(1.25rem,env(safe-area-inset-top))]">
+        <header className="mb-6 flex items-baseline justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="truncate text-2xl font-semibold tracking-tight">
+            <h1 className="type-display truncate text-[26px] font-bold leading-tight">
               {spaceName}
             </h1>
-            <p className="text-sm text-neutral-500 dark:text-neutral-400">
+            <p className="mt-0.5 text-sm text-[var(--ink-soft)]">
               {items.length === 0
                 ? "Nothing tracked yet"
                 : `${items.length} item${items.length === 1 ? "" : "s"}`}
@@ -64,10 +67,10 @@ export default async function ItemsPage() {
         {items.length === 0 ? (
           <EmptyState />
         ) : (
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-7">
             {URGENCY_ORDER.filter((u) => grouped.has(u)).map((urgency) => (
               <section key={urgency}>
-                <h2 className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+                <h2 className="type-display mb-2.5 px-1 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--ink-soft)]">
                   {URGENCY_HEADING[urgency]}
                 </h2>
                 <ul className="flex flex-col gap-3">
@@ -82,21 +85,21 @@ export default async function ItemsPage() {
       </main>
 
       <BottomNav />
-    </>
+    </div>
   );
 }
 
 function EmptyState() {
   return (
-    <div className="rounded-2xl border border-dashed border-border px-6 py-12 text-center">
-      <p className="font-medium">Scan your first item</p>
-      <p className="mx-auto mt-2 max-w-xs text-sm text-neutral-500 dark:text-neutral-400">
+    <div className="rounded-[24px] border border-dashed border-border bg-surface px-6 py-14 text-center">
+      <p className="type-display text-lg font-bold">Scan your first item</p>
+      <p className="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-[var(--ink-soft)]">
         Point your camera at a label and we&apos;ll read the date. One item is enough
         to be useful.
       </p>
       <Link
         href="/add"
-        className="mt-6 inline-flex min-h-12 items-center rounded-xl bg-emerald-600 px-6 font-medium text-white"
+        className="btn-primary mt-7 inline-flex min-h-12 items-center rounded-2xl px-7 text-sm font-semibold"
       >
         Add an item
       </Link>
