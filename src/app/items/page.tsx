@@ -96,7 +96,7 @@ function EmptyState() {
       </p>
       <Link
         href="/add"
-        className="btn-primary mt-7 inline-flex min-h-12 items-center rounded-2xl px-7 text-sm font-semibold"
+        className="btn-primary mt-7 inline-flex min-h-12 items-center rounded-2xl px-7"
       >
         Add an item
       </Link>

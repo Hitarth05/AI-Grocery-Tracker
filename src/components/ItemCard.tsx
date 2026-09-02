@@ -61,7 +61,7 @@ export function ItemCard({ item }: Props) {
           type="button"
           disabled={pending}
           onClick={() => startTransition(() => markConsumed(item.id))}
-          className="btn-primary min-h-12 flex-1 rounded-2xl text-sm font-semibold transition-opacity disabled:opacity-60"
+          className="btn-primary min-h-12 flex-1 rounded-2xl transition-opacity disabled:opacity-60"
         >
           Used it
         </button>
@@ -69,7 +69,7 @@ export function ItemCard({ item }: Props) {
           type="button"
           disabled={pending}
           onClick={() => startTransition(() => markTossed(item.id))}
-          className="btn-secondary min-h-12 flex-1 rounded-2xl text-sm font-semibold transition-opacity disabled:opacity-60"
+          className="btn-secondary min-h-12 flex-1 rounded-2xl transition-opacity disabled:opacity-60"
         >
           Tossed it
         </button>

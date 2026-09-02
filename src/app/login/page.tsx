@@ -53,7 +53,7 @@ export default function LoginPage() {
         <button
           type="button"
           onClick={() => setStatus({ kind: "idle" })}
-          className="mt-8 min-h-12 text-left font-semibold text-[var(--accent)]"
+          className="mt-8 min-h-12 text-left font-semibold text-[var(--primary)]"
         >
           Use a different email
         </button>

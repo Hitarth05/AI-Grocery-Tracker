@@ -18,14 +18,22 @@
 
   --ink-soft: #6f5d54;
 
-  /* Muted sage. There are two greens in this system, separated on the axes
-     the eye reads first: the accent is cool and desaturated (H156 S22), the
-     "plenty of time" pill is a warmer, far more saturated leaf green
-     (H135 S49). They also never share a shape — the accent is only ever a
-     button or nav label, the leaf green only ever a pill. */
-  --accent: #3a5b4e;
-  --accent-ink: #ffffff;
-  --accent-hover: #2f4a40;
+  /* ---------------------------------------------------------------
+     THE app green. Every primary button, the active nav item, focus
+     rings and selected chips resolve to this one value — change it
+     here and they all move together. Nothing anywhere else in the
+     codebase may hardcode a green; there is no second source.
+
+     Muted forest sage. There are two greens in this system, separated
+     on the axes the eye reads first: this one is cool and desaturated
+     (H156 S22), the "plenty of time" pill is a warmer, far more
+     saturated leaf green (H135 S49). They also never share a shape —
+     this is only ever a button, nav label or ring, the leaf green only
+     ever a pill.
+     --------------------------------------------------------------- */
+  --primary: #3a5b4e;
+  --primary-ink: #ffffff;
+  --primary-hover: #2f4a40;
 
   --secondary-bg: #ffffff;
   --secondary-border: #d6c3b3;
@@ -159,7 +167,13 @@ textarea {
 .btn-secondary {
   border-radius: var(--radius-control);
   border: 1px solid transparent;
+  /* Type lives here, not at the call sites. A larger button in the same
+     green reads as a brighter, flatter slab — more area of a colour looks
+     more saturated — so letting each screen pick its own size was enough
+     to make identical greens look like different ones. */
+  font-size: 15px;
   font-weight: 600;
+  line-height: 1.2;
   transition: background-color 120ms ease;
 }
 
@@ -167,11 +181,11 @@ textarea {
    better against every card wash so it asserts itself on a red-tinted
    expired card as clearly as on a green-tinted fresh one. */
 .btn-primary {
-  background: var(--accent);
-  color: var(--accent-ink);
+  background: var(--primary);
+  color: var(--primary-ink);
 }
 .btn-primary:active:not(:disabled) {
-  background: var(--accent-hover);
+  background: var(--primary-hover);
 }
 
 /* Quieter by fill weight rather than by size — same tap target, visibly
@@ -211,9 +225,9 @@ textarea {
   transition: background-color 120ms ease;
 }
 .chip:has(:checked) {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--accent-ink);
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-ink);
 }
 
 /* Errors borrow the expired ink: one red in the system, one meaning. */
@@ -225,7 +239,7 @@ textarea {
 
 /* Visible keyboard focus on everything, not just inputs. */
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
   border-radius: 12px;
 }

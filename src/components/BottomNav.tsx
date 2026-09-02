@@ -30,7 +30,7 @@ export function BottomNav() {
               // Colours come from tokens rather than literals, so the nav
               // follows the system without carrying its own palette.
               className={`flex min-h-16 flex-1 flex-col items-center justify-center gap-1 text-xs ${
-                active ? "text-[var(--accent)]" : "text-[var(--ink-soft)]"
+                active ? "text-[var(--primary)]" : "text-[var(--ink-soft)]"
               }`}
             >
               <Icon />
