@@ -54,6 +54,18 @@ check(
   /@layer components\s*\{/.test(css),
 );
 
+/**
+ * Third-party brand marks whose colours are not ours to change. Google's brand
+ * terms don't permit recolouring the "G", and a sage-tinted one would read as
+ * a knock-off of the thing it exists to be recognisable as.
+ *
+ * Listed by exact path, deliberately. A pattern like "ignore hex in any icon
+ * component" would quietly reopen the door this check was added to close --
+ * every entry here should be a brand asset someone else owns, and short enough
+ * to read at a glance.
+ */
+const BRAND_ASSETS = ["src/components/GoogleMark.tsx"];
+
 // 4. No colour literals in components — the token must be the only source.
 const files = walk(SRC).filter((f) => [".tsx", ".ts"].includes(extname(f)));
 const literals = [];
@@ -66,12 +78,21 @@ for (const file of files) {
     // globals.css owns the palette; TSX may reference tokens via var(--…),
     // and lib/theme.ts is the one declared bridge for values the framework
     // needs as JS strings — checked separately below.
-    if (hit && !line.includes("var(--") && !file.endsWith("lib/theme.ts")) {
+    const exempt =
+      file.endsWith("lib/theme.ts") ||
+      BRAND_ASSETS.some((asset) => file.replaceAll("\\", "/").endsWith(asset));
+
+    if (hit && !line.includes("var(--") && !exempt) {
       literals.push(`${file}:${i + 1}  ${hit[0]}`);
     }
   });
 }
 check("no colour literals in src", literals.length === 0, literals.join("\n    "));
+check(
+  `brand-asset exemptions are declared (${BRAND_ASSETS.length})`,
+  BRAND_ASSETS.every((asset) => files.some((f) => f.replaceAll("\\", "/").endsWith(asset))),
+  "an exemption names a file that no longer exists — remove it",
+);
 
 // 5. Every primary button inherits the fill rather than setting its own.
 const conflicts = [];
