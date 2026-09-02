@@ -53,15 +53,15 @@ export function ItemCard({ item }: Props) {
         </span>
       </Link>
 
-      {/* Both actions are one tap, the same size, and the same visual weight.
-          Neither is the "expected" answer — used and tossed are equally real
-          outcomes, and the honest one shouldn't be the harder tap. */}
+      {/* Same size and the same tap target, different weight: "Used it" is
+          the common outcome and carries the solid fill, "Tossed it" stays
+          one tap away without competing for attention. */}
       <div className="flex gap-2 px-3 pb-3">
         <button
           type="button"
           disabled={pending}
           onClick={() => startTransition(() => markConsumed(item.id))}
-          className="btn-used min-h-12 flex-1 rounded-2xl text-sm font-semibold transition-opacity disabled:opacity-60"
+          className="btn-primary min-h-12 flex-1 rounded-2xl text-sm font-semibold transition-opacity disabled:opacity-60"
         >
           Used it
         </button>
@@ -69,7 +69,7 @@ export function ItemCard({ item }: Props) {
           type="button"
           disabled={pending}
           onClick={() => startTransition(() => markTossed(item.id))}
-          className="btn-tossed min-h-12 flex-1 rounded-2xl text-sm font-semibold transition-opacity disabled:opacity-60"
+          className="btn-secondary min-h-12 flex-1 rounded-2xl text-sm font-semibold transition-opacity disabled:opacity-60"
         >
           Tossed it
         </button>

@@ -95,19 +95,15 @@ textarea {
      chroma apart — one reads as a calm grey-green, the other as vivid.
      They also never share a shape: the accent is only ever a button or nav
      label, the leaf green only ever a pill. */
-  --accent: #456b5c;
+  --accent: #3a5b4e;
   --accent-ink: #ffffff;
-  --accent-hover: #395a4d;
+  --accent-hover: #2f4a40;
 
-  /* Soft fills for the per-item actions. Both buttons sit at the same
-     visual weight so neither reads as the loud default. */
-  --accent-tint: #e7efe9;
-  --accent-tint-border: #d3e2d7;
-  --accent-on-tint: #3a5f4f;
-
-  --neutral-tint: #f0e7de;
-  --neutral-tint-border: #e2d3c6;
-  --neutral-on-tint: #5e4e45;
+  /* The secondary action: paper-white with a warm outline. Its job is to be
+     unmistakably available but visibly quieter than the solid button. */
+  --secondary-bg: #ffffff;
+  --secondary-border: #d6c3b3;
+  --secondary-ink: #574840;
 
   /* Warm-tinted, never black: black shadows over a cream ground go grey. */
   --shadow-card: 0 1px 2px rgba(61, 38, 26, 0.06),
@@ -178,45 +174,29 @@ body:has(.theme-warm) {
   font-variant-numeric: tabular-nums;
 }
 
-/* Solid, and deliberately reserved for the page-level call to action (the
-   empty state). Hierarchy comes from context: one loud button on an empty
-   screen is guidance, the same treatment repeated down a list is noise. */
+/* The primary action, everywhere it appears: solid dark sage, white label.
+   Dark enough that the text clears 7.5:1, light enough that it still reads
+   as sage rather than near-black. */
 .theme-warm .btn-primary {
   background: var(--accent);
   color: var(--accent-ink);
+  border: 1px solid transparent;
 }
 .theme-warm .btn-primary:active:not(:disabled) {
   background: var(--accent-hover);
 }
 
-/* The per-item pair. Same size, same weight, same softness — the only
-   difference is temperature, so neither looks like the expected answer.
-   Both carry a border so they keep a clean edge on any card wash. */
-.theme-warm .btn-used,
-.theme-warm .btn-tossed {
-  border: 1px solid transparent;
+/* The secondary action. Quieter by fill weight rather than by size — same
+   height and width as the primary, so it stays an easy target on a phone,
+   but visibly recessive beside a solid block. The outline keeps its edge
+   crisp on every card wash, tinted or not. */
+.theme-warm .btn-secondary {
+  background: var(--secondary-bg);
+  color: var(--secondary-ink);
+  border: 1px solid var(--secondary-border);
 }
-
-.theme-warm .btn-used {
-  background: var(--accent-tint);
-  border-color: var(--accent-tint-border);
-  color: var(--accent-on-tint);
-}
-.theme-warm .btn-used:active:not(:disabled) {
-  background: #dbe7de;
-}
-
-/* Neutral rather than red. Red is already load-bearing here for expired
-   items, and tossing something is not an error — it is the honest half of
-   the data this app exists to measure. Colouring it like a warning
-   discourages logging it, which quietly corrupts the waste metric. */
-.theme-warm .btn-tossed {
-  background: var(--neutral-tint);
-  border-color: var(--neutral-tint-border);
-  color: var(--neutral-on-tint);
-}
-.theme-warm .btn-tossed:active:not(:disabled) {
-  background: #e8dcd0;
+.theme-warm .btn-secondary:active:not(:disabled) {
+  background: #f7f0e9;
 }
 
 /* Visible keyboard focus everywhere in the theme, not just on inputs. */
