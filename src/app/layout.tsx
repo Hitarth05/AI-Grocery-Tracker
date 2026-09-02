@@ -1,13 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Bricolage_Grotesque, Figtree, Geist } from "next/font/google";
+import { Bricolage_Grotesque, Figtree } from "next/font/google";
 
 import "./globals.css";
 
-const geist = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-
-// Loaded as CSS variables only — the global font-family is untouched, so
-// these apply exactly where .theme-warm switches to them (the items screen
-// during the preview) and nowhere else.
+// Two roles. Bricolage carries headings and eyebrows via .type-display;
+// Figtree is the app font, set on body in globals.css.
 const display = Bricolage_Grotesque({
   variable: "--font-display",
   subsets: ["latin"],
@@ -26,10 +23,8 @@ export const viewport: Viewport = {
   // Lets the app paint under the status bar / home indicator; the safe-area
   // padding in the layout below keeps content out from under them.
   viewportFit: "cover",
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
-  ],
+  // Matches the page ground so the browser chrome blends into the app.
+  themeColor: "#f5e9dc",
 };
 
 export default function RootLayout({
@@ -38,7 +33,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geist.variable} ${display.variable} ${body.variable} antialiased`}
+        className={`${display.variable} ${body.variable} antialiased`}
       >
         {/* Single column, phone width. Desktop gets the same column centered
             rather than a different layout — one thing to maintain. */}

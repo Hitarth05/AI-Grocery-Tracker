@@ -17,7 +17,7 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-background/95 backdrop-blur">
+    <nav className="fixed inset-x-0 bottom-0 z-10 border-t border-[var(--secondary-border)] bg-background/92 backdrop-blur">
       <div className="mx-auto flex w-full max-w-md pb-[env(safe-area-inset-bottom)]">
         {TABS.map(({ href, label, icon: Icon }) => {
           const active = pathname === href || pathname.startsWith(`${href}/`);
@@ -27,8 +27,8 @@ export function BottomNav() {
               key={href}
               href={href}
               aria-current={active ? "page" : undefined}
-              // Colours come from tokens so the nav follows whatever theme it
-              // is rendered inside; :root keeps today's emerald.
+              // Colours come from tokens rather than literals, so the nav
+              // follows the system without carrying its own palette.
               className={`flex min-h-16 flex-1 flex-col items-center justify-center gap-1 text-xs ${
                 active ? "text-[var(--accent)]" : "text-[var(--ink-soft)]"
               }`}

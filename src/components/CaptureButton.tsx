@@ -61,10 +61,10 @@ export function CaptureButton({ formId }: { formId: string }) {
         <img
           src={preview}
           alt={fileName ?? "Selected photo"}
-          className="max-h-64 w-full rounded-2xl object-cover"
+          className="max-h-64 w-full rounded-[20px] object-cover shadow-[var(--shadow-card)]"
         />
       ) : (
-        <div className="flex h-48 w-full items-center justify-center rounded-2xl border border-dashed border-border text-sm text-neutral-500">
+        <div className="flex h-48 w-full items-center justify-center rounded-[20px] border border-dashed border-[var(--secondary-border)] text-sm text-[var(--ink-soft)]">
           No photo yet
         </div>
       )}
@@ -73,7 +73,7 @@ export function CaptureButton({ formId }: { formId: string }) {
         type="button"
         disabled={busy}
         onClick={() => inputRef.current?.click()}
-        className="min-h-14 w-full rounded-xl bg-emerald-600 font-medium text-white disabled:opacity-60"
+        className="btn-primary min-h-14 w-full disabled:opacity-60"
       >
         {busy ? "Uploading…" : preview ? "Retake photo" : "Take a photo"}
       </button>

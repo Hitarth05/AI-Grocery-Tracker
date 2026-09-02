@@ -29,17 +29,6 @@ export function urgencyOf(date: string | null, now: Date = new Date()): Urgency 
   return "ok";
 }
 
-/** Short label for the days-left pill. Kept terse — it sits in a small chip. */
-export function expiryLabel(date: string | null, now: Date = new Date()): string {
-  const days = daysUntil(date, now);
-  if (days === null) return "No date";
-  if (days < -1) return `${Math.abs(days)} days ago`;
-  if (days === -1) return "Yesterday";
-  if (days === 0) return "Today";
-  if (days === 1) return "Tomorrow";
-  return `${days} days`;
-}
-
 /**
  * The days-left label split so the number can be set large and the unit small.
  *
@@ -76,15 +65,6 @@ export const URGENCY_HEADING: Record<Urgency, string> = {
   soon: "Next few days",
   ok: "Later",
   unknown: "No expiry date",
-};
-
-/** Tailwind classes for the pill, by urgency. */
-export const URGENCY_PILL: Record<Urgency, string> = {
-  expired: "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300",
-  today: "bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300",
-  soon: "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300",
-  ok: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300",
-  unknown: "bg-neutral-200 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400",
 };
 
 /**

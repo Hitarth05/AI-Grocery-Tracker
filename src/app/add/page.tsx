@@ -13,17 +13,14 @@ export default async function AddPage({
 
   return (
     <>
-      <main className="px-4 pb-24 pt-[max(1rem,env(safe-area-inset-top))]">
-        <h1 className="text-2xl font-semibold tracking-tight">Add an item</h1>
-        <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+      <main className="px-4 pb-28 pt-[max(1.25rem,env(safe-area-inset-top))]">
+        <h1 className="type-display text-[26px] font-bold leading-tight">Add an item</h1>
+        <p className="mt-1.5 text-sm leading-relaxed text-[var(--ink-soft)]">
           Photograph the label. We&apos;ll read the date if there is one.
         </p>
 
         {error && (
-          <p
-            role="alert"
-            className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-300"
-          >
+          <p role="alert" data-urgency="expired" className="alert mt-4 px-4 py-3 text-sm">
             {error === "no_photo"
               ? "Pick a photo first."
               : error === "unsupported_image"
@@ -38,7 +35,7 @@ export default async function AddPage({
 
         <Link
           href="/add/confirm"
-          className="mt-4 flex min-h-14 items-center justify-center rounded-xl border border-border font-medium"
+          className="btn-secondary mt-4 flex min-h-14 items-center justify-center"
         >
           Enter it by hand instead
         </Link>

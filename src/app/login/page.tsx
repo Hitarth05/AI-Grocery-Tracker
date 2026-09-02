@@ -45,15 +45,15 @@ export default function LoginPage() {
   if (status.kind === "sent") {
     return (
       <main className="flex min-h-dvh flex-col justify-center px-6 pb-[env(safe-area-inset-bottom)]">
-        <h1 className="text-2xl font-semibold">Check your email</h1>
-        <p className="mt-3 text-neutral-600 dark:text-neutral-400">
+        <h1 className="type-display text-[26px] font-bold">Check your email</h1>
+        <p className="mt-3 leading-relaxed text-[var(--ink-soft)]">
           We sent a sign-in link to <span className="font-medium">{email}</span>. Open
           it on this phone and you&apos;re in.
         </p>
         <button
           type="button"
           onClick={() => setStatus({ kind: "idle" })}
-          className="mt-8 min-h-12 text-left font-medium text-emerald-700 dark:text-emerald-400"
+          className="mt-8 min-h-12 text-left font-semibold text-[var(--accent)]"
         >
           Use a different email
         </button>
@@ -64,8 +64,8 @@ export default function LoginPage() {
   return (
     <main className="flex min-h-dvh flex-col px-6 pb-[env(safe-area-inset-bottom)]">
       <div className="flex flex-1 flex-col justify-center">
-        <h1 className="text-3xl font-semibold tracking-tight">Fridge</h1>
-        <p className="mt-2 text-neutral-600 dark:text-neutral-400">
+        <h1 className="type-display text-[34px] font-bold">Fridge</h1>
+        <p className="mt-2 text-[17px] leading-relaxed text-[var(--ink-soft)]">
           Snap a photo, we&apos;ll remind you before it goes bad.
         </p>
       </div>
@@ -86,13 +86,13 @@ export default function LoginPage() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@example.com"
-          className="min-h-14 rounded-xl border border-border bg-surface px-4 outline-none focus:ring-2 focus:ring-emerald-600"
+          className="input min-h-14 px-4"
         />
 
         <button
           type="submit"
           disabled={status.kind === "sending"}
-          className="min-h-14 rounded-xl bg-emerald-600 font-medium text-white disabled:opacity-60"
+          className="btn-primary min-h-14 disabled:opacity-60"
         >
           {status.kind === "sending" ? "Sending…" : "Email me a sign-in link"}
         </button>
@@ -102,19 +102,19 @@ export default function LoginPage() {
             key={id}
             type="button"
             onClick={() => signInWith(id)}
-            className="min-h-14 rounded-xl border border-border font-medium"
+            className="btn-secondary min-h-14"
           >
             Continue with {label}
           </button>
         ))}
 
         {status.kind === "error" && (
-          <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+          <p role="alert" data-urgency="expired" className="alert px-4 py-3 text-sm">
             {status.message}
           </p>
         )}
 
-        <p className="mt-2 text-center text-xs text-neutral-500">
+        <p className="mt-2 text-center text-xs text-[var(--ink-soft)]">
           No password. The link signs you in.
         </p>
       </form>

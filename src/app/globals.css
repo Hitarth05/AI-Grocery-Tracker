@@ -1,25 +1,44 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --surface: #f5f5f4;
-  --border: #e7e5e4;
-  --ink-soft: #737373;
-  /* emerald-700 — the current accent, tokenized so themed subtrees can
-     override it without components hardcoding a colour. */
-  --accent: #047857;
-}
+/* ============================================================
+   The design system. Light only, by choice: the urgency ramp
+   depends on saturated inks reading against pale tints, and
+   inverting that flattens every hue into every other one.
+   ============================================================ */
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --surface: #1c1917;
-    --border: #292524;
-    --ink-soft: #a3a3a3;
-    --accent: #34d399; /* emerald-400 */
-  }
+:root {
+  /* Warm cream with a blush cast, deliberately a few percent deeper than it
+     wants to be. At a near-white the cards had no edge and the shadow was
+     doing all the work; at this depth every card lifts off the ground on its
+     own, which is what makes a list read as airy rather than flat. */
+  --background: #f5e9dc;
+  --surface: #ffffff;
+  --foreground: #2a1c16;
+  --border: #e6d5c6;
+
+  --ink-soft: #6f5d54;
+
+  /* Muted sage. There are two greens in this system, separated on the axes
+     the eye reads first: the accent is cool and desaturated (H156 S22), the
+     "plenty of time" pill is a warmer, far more saturated leaf green
+     (H135 S49). They also never share a shape — the accent is only ever a
+     button or nav label, the leaf green only ever a pill. */
+  --accent: #3a5b4e;
+  --accent-ink: #ffffff;
+  --accent-hover: #2f4a40;
+
+  --secondary-bg: #ffffff;
+  --secondary-border: #d6c3b3;
+  --secondary-ink: #574840;
+
+  --danger-ink: #8f2a22;
+
+  /* Warm-tinted, never black: black shadows over a cream ground go grey. */
+  --shadow-card: 0 1px 2px rgba(61, 38, 26, 0.06),
+    0 12px 28px -12px rgba(61, 38, 26, 0.16);
+
+  --radius-card: 20px;
+  --radius-control: 16px;
 }
 
 @theme inline {
@@ -27,25 +46,23 @@
   --color-foreground: var(--foreground);
   --color-surface: var(--surface);
   --color-border: var(--border);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-body);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  color-scheme: light;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
-  /* The bottom nav is fixed; keep it clear of the home indicator. */
+  font-family: var(--font-body), system-ui, -apple-system, sans-serif;
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: none;
 }
 
-/* Phone-first: no text inflation on rotate, and inputs at >=16px so iOS
-   Safari doesn't zoom the viewport when one is focused. */
-html {
-  -webkit-text-size-adjust: 100%;
-}
-
+/* Phone-first: inputs at >=16px so iOS Safari doesn't zoom on focus. */
 input,
 select,
 textarea {
@@ -61,146 +78,153 @@ textarea {
   }
 }
 
-/* ============================================================
-   Warm theme — preview, currently scoped to the items screen.
-
-   Redefines the same four variables :root sets, so every component
-   inside .theme-warm restyles without touching its colour classes.
-   To promote it everywhere, move the class onto <body> and delete
-   the :root block above. To back it out, delete this block.
-
-   Deliberately light-only: there is no dark variant here, so this
-   screen stays warm and airy even when the OS is in dark mode. The
-   urgency ramp depends on saturated inks reading against pale tints,
-   and inverting that made every hue go muddy.
-   ============================================================ */
-
-.theme-warm {
-  /* Warm cream with a blush cast, deliberately a few percent deeper than
-     it wants to be. At a near-white the cards had no edge and the shadow
-     was doing all the work; at this depth every card lifts off the ground
-     on its own, which is what makes the list read as airy rather than
-     flat. Measured separation is 1.10-1.15 against the card washes. */
-  --background: #f5e9dc;
-  --surface: #ffffff;
-  --foreground: #2a1c16;
-  --border: #e6d5c6;
-
-  --ink-soft: #6f5d54;
-
-  /* Muted sage. There are now two greens on this screen, so they are
-     separated on the two axes the eye reads first: the accent is cool and
-     desaturated (H156 S22), the "plenty of time" pill is a warmer, far more
-     saturated leaf green (H135 S49). 21 degrees of hue and 27 points of
-     chroma apart — one reads as a calm grey-green, the other as vivid.
-     They also never share a shape: the accent is only ever a button or nav
-     label, the leaf green only ever a pill. */
-  --accent: #3a5b4e;
-  --accent-ink: #ffffff;
-  --accent-hover: #2f4a40;
-
-  /* The secondary action: paper-white with a warm outline. Its job is to be
-     unmistakably available but visibly quieter than the solid button. */
-  --secondary-bg: #ffffff;
-  --secondary-border: #d6c3b3;
-  --secondary-ink: #574840;
-
-  /* Warm-tinted, never black: black shadows over a cream ground go grey. */
-  --shadow-card: 0 1px 2px rgba(61, 38, 26, 0.06),
-    0 12px 28px -12px rgba(61, 38, 26, 0.16);
-
-  color-scheme: light;
-  font-family: var(--font-body), system-ui, -apple-system, sans-serif;
-  background: var(--background);
-  color: var(--foreground);
-}
-
-/* The centred column is narrower than the viewport on desktop, and body
-   still carries :root's background. Match it so the page doesn't sit in a
-   dark gutter when the OS is in dark mode. Scoped by :has() so no other
-   screen is affected. */
-body:has(.theme-warm) {
-  background: #f5e9dc;
-}
-
-/* The urgency ramp, food-derived rather than traffic lights. Each level
-   sets three variables that any descendant can consume:
+/* ---- urgency ramp ----------------------------------------------------
+   Food-derived rather than traffic lights. Each level sets three variables
+   any descendant can consume:
      --u-ink   saturated, for the pill's text (>= 5:1 on its own tint)
      --u-tint  the pill's fill
-     --u-wash  the card's background — paler than the page ground, so every
-               card lifts off it, with just enough hue to read as warm or cool */
-.theme-warm [data-urgency="ok"] {
+     --u-wash  a card's background — paler than the page ground, so every
+               card lifts off it, with just enough hue to read warm or cool
+   -------------------------------------------------------------------- */
+
+[data-urgency="ok"] {
   --u-ink: #27713a;
   --u-tint: #e6f4e6;
   --u-wash: #f8fcf7;
 }
-.theme-warm [data-urgency="soon"] {
+[data-urgency="soon"] {
   --u-ink: #8a5a12;
   --u-tint: #fcefd8;
   --u-wash: #fffaf0;
 }
-.theme-warm [data-urgency="today"] {
+[data-urgency="today"] {
   --u-ink: #a34418;
   --u-tint: #fde7da;
   --u-wash: #fff6ef;
 }
-.theme-warm [data-urgency="expired"] {
+[data-urgency="expired"] {
   --u-ink: #8f2a22;
   --u-tint: #fbe0dc;
   --u-wash: #fff3f0;
 }
-.theme-warm [data-urgency="unknown"] {
+[data-urgency="unknown"] {
   --u-ink: #6f5d54;
   --u-tint: #f2e9e3;
   --u-wash: #fdfaf7;
 }
 
-/* ---- components ---- */
+/* ---- type ---- */
 
-.theme-warm .type-display {
+.type-display {
   font-family: var(--font-display), var(--font-body), system-ui, sans-serif;
   letter-spacing: -0.02em;
 }
 
-.theme-warm .u-card {
-  background: var(--u-wash);
-  box-shadow: var(--shadow-card);
+/* An eyebrow: small, spaced, quiet. Labels a group without competing. */
+.type-eyebrow {
+  font-family: var(--font-display), var(--font-body), system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
 }
 
-.theme-warm .u-pill {
+/* ---- surfaces ---- */
+
+/* A card whose background carries its urgency. */
+.u-card {
+  background: var(--u-wash);
+  box-shadow: var(--shadow-card);
+  border-radius: var(--radius-card);
+}
+
+/* A card with nothing to signal: plain paper. */
+.panel {
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  border-radius: var(--radius-card);
+}
+
+.u-pill {
   background: var(--u-tint);
   color: var(--u-ink);
   /* Tabular figures so day counts don't jitter between stacked cards. */
   font-variant-numeric: tabular-nums;
 }
 
-/* The primary action, everywhere it appears: solid dark sage, white label.
-   Dark enough that the text clears 7.5:1, light enough that it still reads
-   as sage rather than near-black. */
-.theme-warm .btn-primary {
+/* ---- controls ---- */
+
+.btn-primary,
+.btn-secondary {
+  border-radius: var(--radius-control);
+  border: 1px solid transparent;
+  font-weight: 600;
+  transition: background-color 120ms ease;
+}
+
+/* Solid dark sage, white label: 7.5:1, past AAA for normal text, and 7:1 or
+   better against every card wash so it asserts itself on a red-tinted
+   expired card as clearly as on a green-tinted fresh one. */
+.btn-primary {
   background: var(--accent);
   color: var(--accent-ink);
-  border: 1px solid transparent;
 }
-.theme-warm .btn-primary:active:not(:disabled) {
+.btn-primary:active:not(:disabled) {
   background: var(--accent-hover);
 }
 
-/* The secondary action. Quieter by fill weight rather than by size — same
-   height and width as the primary, so it stays an easy target on a phone,
-   but visibly recessive beside a solid block. The outline keeps its edge
-   crisp on every card wash, tinted or not. */
-.theme-warm .btn-secondary {
+/* Quieter by fill weight rather than by size — same tap target, visibly
+   recessive. The outline keeps its edge on any background. */
+.btn-secondary {
   background: var(--secondary-bg);
   color: var(--secondary-ink);
-  border: 1px solid var(--secondary-border);
+  border-color: var(--secondary-border);
 }
-.theme-warm .btn-secondary:active:not(:disabled) {
+.btn-secondary:active:not(:disabled) {
   background: #f7f0e9;
 }
 
-/* Visible keyboard focus everywhere in the theme, not just on inputs. */
-.theme-warm :focus-visible {
+.btn-secondary.is-danger {
+  color: var(--danger-ink);
+}
+
+.input {
+  background: var(--surface);
+  border: 1px solid var(--secondary-border);
+  border-radius: var(--radius-control);
+  color: var(--foreground);
+  outline: none;
+}
+.input::placeholder {
+  color: var(--ink-soft);
+  opacity: 0.7;
+}
+
+/* A one-tap choice among a few. Selected takes the solid treatment so the
+   answer is legible at a glance, not just to whoever is looking for it. */
+.chip {
+  background: var(--surface);
+  border: 1px solid var(--secondary-border);
+  border-radius: var(--radius-control);
+  color: var(--secondary-ink);
+  transition: background-color 120ms ease;
+}
+.chip:has(:checked) {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* Errors borrow the expired ink: one red in the system, one meaning. */
+.alert {
+  background: var(--u-tint, #fbe0dc);
+  color: var(--u-ink, #8f2a22);
+  border-radius: var(--radius-control);
+}
+
+/* Visible keyboard focus on everything, not just inputs. */
+:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
   border-radius: 12px;

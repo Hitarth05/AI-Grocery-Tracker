@@ -19,10 +19,10 @@ export default async function SettingsPage() {
 
   return (
     <>
-      <main className="px-4 pb-24 pt-[max(1rem,env(safe-area-inset-top))]">
-        <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
+      <main className="px-4 pb-28 pt-[max(1.25rem,env(safe-area-inset-top))]">
+        <h1 className="type-display text-[26px] font-bold leading-tight">Settings</h1>
 
-        <dl className="mt-6 flex flex-col gap-3 rounded-2xl border border-border bg-surface p-4 text-sm">
+        <dl className="panel mt-6 flex flex-col gap-3.5 p-5 text-sm">
           <Row label="Signed in as">{user?.email ?? "—"}</Row>
           <Row label="Space">{spaceName}</Row>
           <Row label="Members">{memberCount ?? 1}</Row>
@@ -31,7 +31,7 @@ export default async function SettingsPage() {
         <form action="/auth/signout" method="post" className="mt-6">
           <button
             type="submit"
-            className="min-h-14 w-full rounded-xl border border-border font-medium text-red-600 dark:text-red-400"
+            className="btn-secondary is-danger min-h-14 w-full"
           >
             Sign out
           </button>
@@ -46,7 +46,7 @@ export default async function SettingsPage() {
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex justify-between gap-4">
-      <dt className="text-neutral-500 dark:text-neutral-400">{label}</dt>
+      <dt className="text-[var(--ink-soft)]">{label}</dt>
       <dd className="truncate text-right">{children}</dd>
     </div>
   );

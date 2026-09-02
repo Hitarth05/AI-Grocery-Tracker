@@ -9,8 +9,7 @@ export const dynamic = "force-dynamic";
 
 const LOCATIONS: StorageLocation[] = ["fridge", "freezer", "pantry", "other"];
 
-const INPUT =
-  "min-h-14 w-full rounded-xl border border-border bg-surface px-4 outline-none focus:ring-2 focus:ring-emerald-600";
+const INPUT = "input min-h-14 w-full px-4";
 
 export default async function ConfirmPage({
   searchParams,
@@ -42,10 +41,10 @@ export default async function ConfirmPage({
 
   return (
     <main className="px-4 pb-10 pt-[max(1rem,env(safe-area-inset-top))]">
-      <h1 className="text-2xl font-semibold tracking-tight">
+      <h1 className="type-display text-[26px] font-bold leading-tight">
         {needsReview ? "Check this" : "Looks good?"}
       </h1>
-      <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+      <p className="mt-1.5 text-sm leading-relaxed text-[var(--ink-soft)]">
         {extraction
           ? needsReview
             ? "We weren't confident enough to file this on its own."
@@ -54,10 +53,7 @@ export default async function ConfirmPage({
       </p>
 
       {error && (
-        <p
-          role="alert"
-          className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-300"
-        >
+        <p role="alert" data-urgency="expired" className="alert mt-4 px-4 py-3 text-sm">
           {error === "name_required" ? "Give the item a name." : error}
         </p>
       )}
@@ -67,7 +63,7 @@ export default async function ConfirmPage({
         <img
           src={photoUrl}
           alt="The item you photographed"
-          className="mt-5 max-h-56 w-full rounded-2xl object-cover"
+          className="mt-5 max-h-56 w-full rounded-[20px] object-cover shadow-[var(--shadow-card)]"
         />
       )}
 
@@ -102,7 +98,7 @@ export default async function ConfirmPage({
             {LOCATIONS.map((loc, i) => (
               <label
                 key={loc}
-                className="flex min-h-12 cursor-pointer items-center justify-center rounded-xl border border-border bg-surface text-sm capitalize has-[:checked]:border-emerald-600 has-[:checked]:bg-emerald-600 has-[:checked]:text-white"
+                className="chip flex min-h-12 cursor-pointer items-center justify-center text-sm font-medium capitalize"
               >
                 <input
                   type="radio"
@@ -137,14 +133,14 @@ export default async function ConfirmPage({
 
         <SubmitButton
           pendingLabel="Saving…"
-          className="mt-2 min-h-14 rounded-xl bg-emerald-600 font-medium text-white"
+          className="btn-primary mt-2 min-h-14"
         >
           Track it
         </SubmitButton>
 
         <Link
           href="/items"
-          className="flex min-h-12 items-center justify-center text-sm text-neutral-500"
+          className="flex min-h-12 items-center justify-center text-sm font-medium text-[var(--ink-soft)]"
         >
           Cancel
         </Link>
@@ -153,8 +149,7 @@ export default async function ConfirmPage({
   );
 }
 
-const FIELD_LABEL =
-  "px-1 text-xs font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400";
+const FIELD_LABEL = "type-eyebrow px-1";
 
 /**
  * `htmlFor` associates the caption with a single control. The radio group has
