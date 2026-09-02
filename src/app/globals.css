@@ -63,111 +63,88 @@ textarea {
 
 /* ============================================================
    Warm theme — preview, currently scoped to the items screen.
-   
+
    Redefines the same four variables :root sets, so every component
    inside .theme-warm restyles without touching its colour classes.
    To promote it everywhere, move the class onto <body> and delete
    the :root block above. To back it out, delete this block.
+
+   Deliberately light-only: there is no dark variant here, so this
+   screen stays warm and airy even when the OS is in dark mode. The
+   urgency ramp depends on saturated inks reading against pale tints,
+   and inverting that made every hue go muddy.
    ============================================================ */
 
 .theme-warm {
-  /* Blush rather than cream: a warm white with a pink cast, which stays
-     warm without pushing white cards towards muddy. */
-  --background: #fdf6f1;
+  /* Warm cream with a blush cast, deliberately a few percent deeper than
+     it wants to be. At a near-white the cards had no edge and the shadow
+     was doing all the work; at this depth every card lifts off the ground
+     on its own, which is what makes the list read as airy rather than
+     flat. Measured separation is 1.10-1.15 against the card washes. */
+  --background: #f5e9dc;
   --surface: #ffffff;
-  --foreground: #2b1d17;
-  --border: #f0e2d8;
+  --foreground: #2a1c16;
+  --border: #e6d5c6;
 
-  --ink-soft: #7c6960;
+  --ink-soft: #6f5d54;
 
-  /* Chestnut. Deliberately not terracotta: the urgency ramp owns amber
-     and red, and a brand colour sitting between them would read as a
-     deadline. This one cannot be mistaken for one. */
-  --accent: #6f4436;
+  /* Mulberry. The previous chestnut sat at roughly the same hue as the
+     "today" and "expired" inks, just desaturated — which is exactly why
+     it read as muddy rather than as its own colour. This sits well clear
+     of the whole amber-to-red ramp and of the greens, so the one button
+     you press most can't be mistaken for a deadline. */
+  --accent: #7e3a66;
   --accent-ink: #ffffff;
-  --accent-hover: #5b3729;
+  --accent-hover: #6a3156;
 
-  /* Warm-tinted rather than black: black shadows over a blush ground
-     go grey and dead. */
-  --shadow-card: 0 1px 2px rgba(43, 29, 23, 0.05),
-    0 10px 28px -14px rgba(43, 29, 23, 0.18);
+  /* Warm-tinted, never black: black shadows over a cream ground go grey. */
+  --shadow-card: 0 1px 2px rgba(61, 38, 26, 0.06),
+    0 12px 28px -12px rgba(61, 38, 26, 0.16);
 
+  color-scheme: light;
   font-family: var(--font-body), system-ui, -apple-system, sans-serif;
   background: var(--background);
   color: var(--foreground);
 }
 
+/* The centred column is narrower than the viewport on desktop, and body
+   still carries :root's background. Match it so the page doesn't sit in a
+   dark gutter when the OS is in dark mode. Scoped by :has() so no other
+   screen is affected. */
+body:has(.theme-warm) {
+  background: #f5e9dc;
+}
+
 /* The urgency ramp, food-derived rather than traffic lights. Each level
    sets three variables that any descendant can consume:
-     --u-ink   saturated, for the pill's text
+     --u-ink   saturated, for the pill's text (>= 5:1 on its own tint)
      --u-tint  the pill's fill
-     --u-wash  the card's own background — much fainter, so a fridge full
-               of fresh food reads calm rather than decorated */
+     --u-wash  the card's background — paler than the page ground, so every
+               card lifts off it, with just enough hue to read as warm or cool */
 .theme-warm [data-urgency="ok"] {
-  --u-ink: #2f6b41;
-  --u-tint: #eaf2e7;
-  --u-wash: #f8fbf7;
+  --u-ink: #2c6a3e;
+  --u-tint: #e6f2e6;
+  --u-wash: #f8fcf7;
 }
 .theme-warm [data-urgency="soon"] {
   --u-ink: #8a5a12;
-  --u-tint: #fbeedc;
-  --u-wash: #fefaf3;
+  --u-tint: #fcefd8;
+  --u-wash: #fffaf0;
 }
 .theme-warm [data-urgency="today"] {
-  --u-ink: #b04a1c;
-  --u-tint: #fce6d9;
-  --u-wash: #fef6f1;
+  --u-ink: #a34418;
+  --u-tint: #fde7da;
+  --u-wash: #fff6ef;
 }
 .theme-warm [data-urgency="expired"] {
-  --u-ink: #9c2f26;
-  --u-tint: #fadfdb;
-  --u-wash: #fdf2f0;
+  --u-ink: #8f2a22;
+  --u-tint: #fbe0dc;
+  --u-wash: #fff3f0;
 }
 .theme-warm [data-urgency="unknown"] {
-  --u-ink: #7c6960;
+  --u-ink: #6f5d54;
   --u-tint: #f2e9e3;
-  --u-wash: #fbf8f5;
-}
-
-@media (prefers-color-scheme: dark) {
-  .theme-warm {
-    --background: #1a120e;
-    --surface: #241913;
-    --foreground: #f4e9e1;
-    --border: #392a22;
-    --ink-soft: #b39c90;
-    --accent: #c08063;
-    --accent-ink: #241913;
-    --accent-hover: #cf9276;
-    --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4),
-      0 10px 28px -14px rgba(0, 0, 0, 0.6);
-  }
-
-  .theme-warm [data-urgency="ok"] {
-    --u-ink: #9ed8ae;
-    --u-tint: #1e2e22;
-    --u-wash: #1e1610;
-  }
-  .theme-warm [data-urgency="soon"] {
-    --u-ink: #e8b764;
-    --u-tint: #33240f;
-    --u-wash: #221812;
-  }
-  .theme-warm [data-urgency="today"] {
-    --u-ink: #f0a277;
-    --u-tint: #3a2114;
-    --u-wash: #241813;
-  }
-  .theme-warm [data-urgency="expired"] {
-    --u-ink: #f09184;
-    --u-tint: #3d1d19;
-    --u-wash: #261613;
-  }
-  .theme-warm [data-urgency="unknown"] {
-    --u-ink: #b39c90;
-    --u-tint: #2a201a;
-    --u-wash: #1f1713;
-  }
+  --u-wash: #fdfaf7;
 }
 
 /* ---- components ---- */
@@ -197,6 +174,8 @@ textarea {
   background: var(--accent-hover);
 }
 
+/* Reads as paper against the tinted card rather than as a second button
+   competing with the primary one. */
 .theme-warm .btn-quiet {
   background: var(--surface);
   color: var(--foreground);
