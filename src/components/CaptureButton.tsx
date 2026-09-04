@@ -1,34 +1,40 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { useFormStatus } from "react-dom";
+import { useRef, useState, useTransition } from "react";
+
+import { uploadAndExtract } from "@/app/add/actions";
+import { downscalePhoto } from "@/lib/downscale";
 
 /**
  * capture="environment" hands straight to the rear camera on iOS and Android
  * rather than opening a file picker — one tap from intent to shutter, which is
  * the whole point. On desktop the same input degrades to a file chooser.
+ *
+ * The action is called directly rather than through a form submit: the upload
+ * is a downscaled copy, and a form would post whatever is in the file input.
+ * Replacing that needs a DataTransfer; calling the action is simpler and means
+ * there is no submit event to fire twice.
  */
-export function CaptureButton({ formId }: { formId: string }) {
+export function CaptureButton() {
   const inputRef = useRef<HTMLInputElement>(null);
   // Ref guards the handler (synchronous, survives no re-render); state drives
   // the button label (a ref change alone would not repaint it).
   const submitted = useRef(false);
-  const [submitting, setSubmitting] = useState(false);
+  const [working, setWorking] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
-  const { pending } = useFormStatus();
+  const [pending, startTransition] = useTransition();
 
-  function onChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function onChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Picking a second photo while the first is still uploading would fire the
-    // action twice — two uploads and two extraction rows for one item. The ref
-    // rather than `pending` because pending only flips after the submit lands,
-    // which is a frame too late to catch a fast second pick.
-    if (submitted.current || pending) return;
+    // Set before the first await, not after. Downscaling is asynchronous, so a
+    // second change event arriving mid-resize would otherwise pass this check
+    // too and upload the same item twice.
+    if (submitted.current) return;
     submitted.current = true;
-    setSubmitting(true);
+    setWorking(true);
 
     setFileName(file.name);
     setPreview((old) => {
@@ -36,19 +42,26 @@ export function CaptureButton({ formId }: { formId: string }) {
       return URL.createObjectURL(file);
     });
 
-    // Submit as soon as a photo exists — no second "upload" tap.
-    (document.getElementById(formId) as HTMLFormElement | null)?.requestSubmit();
+    let upload = file;
+    try {
+      upload = await downscalePhoto(file);
+    } catch {
+      // Browser could not decode it — Chrome cannot read HEIC. Send the
+      // original and let the bucket and the model deal with it.
+    }
+
+    const form = new FormData();
+    form.append("photo", upload, upload.name);
+    startTransition(() => uploadAndExtract(form));
   }
 
-  const busy = pending || submitting;
+  const busy = working || pending;
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="mt-6 flex flex-col items-center gap-4">
       <input
         ref={inputRef}
-        form={formId}
         type="file"
-        name="photo"
         accept="image/*"
         capture="environment"
         disabled={busy}

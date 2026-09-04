@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-import { uploadAndExtract } from "@/app/add/actions";
 import { BottomNav } from "@/components/BottomNav";
 import { CaptureButton } from "@/components/CaptureButton";
 
@@ -24,14 +23,12 @@ export default async function AddPage({
             {error === "no_photo"
               ? "Pick a photo first."
               : error === "unsupported_image"
-                ? "That image format can't be read. Take the photo with the camera button, or use a JPEG or PNG."
+                ? "That image format can't be read. Take the photo with the camera button, or use a JPEG, PNG or HEIC."
                 : error}
           </p>
         )}
 
-        <form id="capture-form" action={uploadAndExtract} className="mt-6">
-          <CaptureButton formId="capture-form" />
-        </form>
+        <CaptureButton />
 
         <Link
           href="/add/confirm"

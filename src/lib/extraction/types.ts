@@ -30,18 +30,21 @@ export class ExtractionUnavailableError extends Error {
 }
 
 /**
- * Image formats the app accepts.
+ * Image formats the app accepts. Migration 0006 enforces the same list at the
+ * bucket.
  *
- * This is the intersection of what our providers read, not the maximum any one
- * of them supports: Gemini also reads HEIC and HEIF, Claude does not. Keeping
- * the narrower list means flipping ACTIVE_PROVIDER back to Anthropic can never
- * strand photos that were storable but unreadable. Migration 0005 enforces the
- * same list at the bucket.
+ * This is Gemini's set, not the intersection with Anthropic's — Claude reads
+ * neither HEIC nor HEIF. Switching ACTIVE_PROVIDER back to Anthropic therefore
+ * accepts HEIC at upload and fails to read it later, which degrades to manual
+ * entry rather than erroring, but wastes the scan. Narrow this list at the same
+ * time if that switch is ever made.
  */
 export const SUPPORTED_MEDIA_TYPES = [
   "image/jpeg",
   "image/png",
   "image/webp",
+  "image/heic",
+  "image/heif",
 ] as const;
 
 export type SupportedMediaType = (typeof SUPPORTED_MEDIA_TYPES)[number];

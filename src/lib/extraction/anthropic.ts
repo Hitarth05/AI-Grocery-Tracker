@@ -4,11 +4,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 
 import { predictionSchema, SYSTEM_PROMPT, type RawPrediction } from "./prompt";
-import {
-  ExtractionUnavailableError,
-  isSupportedMediaType,
-  type ImageSource,
-} from "./types";
+import { ExtractionUnavailableError, type ImageSource } from "./types";
 
 /**
  * Vision-capable Sonnet tier. Sonnet 5 is the first Sonnet with high-resolution
@@ -27,6 +23,18 @@ const MODEL = "claude-sonnet-5";
  * at the fridge waiting for. Sweep this against real scans before changing it.
  */
 const EFFORT = "medium" as const;
+
+/** What the Anthropic vision API accepts. */
+const CLAUDE_MEDIA_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+] as const;
+
+function isClaudeMediaType(t: string): t is (typeof CLAUDE_MEDIA_TYPES)[number] {
+  return (CLAUDE_MEDIA_TYPES as readonly string[]).includes(t);
+}
 
 let client: Anthropic | null = null;
 
@@ -51,7 +59,10 @@ function getClient(): Anthropic {
 export async function runAnthropicExtraction(
   image: ImageSource,
 ): Promise<RawPrediction> {
-  if (!isSupportedMediaType(image.mediaType)) {
+  // Checked here rather than against the app-wide list, which is Gemini's and
+  // includes HEIC. Claude reads neither HEIC nor HEIF, so a stored phone photo
+  // reaches this provider unreadable and has to be refused rather than sent.
+  if (!isClaudeMediaType(image.mediaType)) {
     throw new ExtractionUnavailableError(
       `Vision does not accept ${image.mediaType}`,
       "unsupported_media_type",

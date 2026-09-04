@@ -27,9 +27,9 @@ export async function uploadAndExtract(formData: FormData) {
     redirect("/add?error=no_photo");
   }
 
-  // Rejected before the upload, not after: the vision API cannot read HEIC, so
-  // storing it would leave a photo no model can extract from. Migration 0005
-  // enforces the same list at the bucket, this is the message the user sees.
+  // Rejected before the upload, not after: storing a format the model cannot
+  // read leaves a photo nothing can extract from. Migration 0006 enforces the
+  // same list at the bucket, this is the message the user sees.
   if (!isSupportedMediaType(photo.type)) {
     redirect("/add?error=unsupported_image");
   }
